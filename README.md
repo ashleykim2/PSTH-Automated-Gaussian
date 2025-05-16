@@ -54,8 +54,3 @@ The resulting figure from `final.m` shows early and late responses across all 16
 ## Dependencies
 - MATLAB R2020a or later
 - Curve Fitting Toolbox (for `lsqcurvefit`)
-
----
-
-## Author
-Ashley Kim 
