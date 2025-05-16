@@ -5,7 +5,7 @@ This repository automates the process of fitting early and late neural responses
 
 ---
 
-## 📂 Files
+## Files
 
 ### `automatedGaussianFit.m`
 This script performs **automated curve fitting** on multichannel PSTH data. For each stimulation level and electrode channel:
@@ -37,7 +37,7 @@ This script visualizes the automated fit results across **all 16 channels** in a
 
 ---
 
-## 💡 Notes
+## Notes
 
 - You can switch datasets by updating the `.mat` file path inside each script.
 - The pipeline assumes data is stored in a standard format with variables: `HistPeriod`, `details`, and `PeriodEdges4Plotting`.
@@ -45,17 +45,17 @@ This script visualizes the automated fit results across **all 16 channels** in a
 
 ---
 
-## 📈 Example Output
+## Example Output
 
 The resulting figure from `final.m` shows early and late responses across all 16 channels for a given trial. This allows intuitive visual inspection of the quality and consistency of the fits.
 
 ---
 
-## 📎 Dependencies
+## Dependencies
 - MATLAB R2020a or later
 - Curve Fitting Toolbox (for `lsqcurvefit`)
 
 ---
 
-## 👩‍🔬 Author
+## Author
 Ashley Kim 
