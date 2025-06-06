@@ -1,9 +1,13 @@
 %% final.m — Overlayed Gaussian Fits (16 Subplots in One Figure)
 clc; clear; close all;
 
+%% Specify which trial to analyze
+dataFile = 'VA_21_04_20-Trial016.mat';
+fitFile  = 'autoFitResults.mat';  % or the corresponding trial-specific fit file
+
 %% Load data and fit results
-load('autoFitResults.mat');  % contains autoFitResults
-load(fullfile('..','Data','VA_21_04_20-Trial016.mat'));  % or change to Trial016.mat if needed
+load(fitFile);            % contains autoFitResults
+load(fullfile('..','Data', dataFile));  % contains HistPeriod, details, PeriodEdges4Plotting
 
 % Preprocess PSTH
 HistPeriodtoPlot = squeeze(mean(HistPeriod(:,:,:,1:end/2+1,:), 4));
@@ -26,7 +30,7 @@ peakPSTH = squeeze(max(HistPeriodtoPlot, [], 3));
 isAboveThreshold = peakPSTH > 4 * baselineSTD';
 
 %% Create one figure with all channels
-figure('Name', 'Overlayed Fits for All Channels', 'NumberTitle', 'off', 'Position', [100 100 1600 900]);
+figure('Name', sprintf('Overlayed Fits: %s', dataFile), 'NumberTitle', 'off', 'Position', [100 100 1600 900]);
 
 for ch = 1:numChannels
     subplot(4, 4, ch); hold on;
@@ -58,4 +62,5 @@ for ch = 1:numChannels
     ylim([0 inf]);
 end
 
-sgtitle('Overlayed Early (solid) and Late (dashed) Gaussian Fits Across All Channels');
+% Add dynamic title with filename
+sgtitle(sprintf('Overlayed Early (solid) and Late (dashed) Gaussian Fits — %s', dataFile), 'FontSize', 12);
