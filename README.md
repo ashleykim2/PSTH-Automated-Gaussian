@@ -1,5 +1,5 @@
-# PSTH-Automated-Gaussian
-# BiGaussian Fitting Pipeline for Neural PSTH Data
+# PSTH-Automated-Gaussian  
+## BiGaussian Fitting Pipeline for Neural PSTH Data
 
 This repository automates the process of fitting early and late neural responses using bi-Gaussian models. The scripts are designed for peri-stimulus time histogram (PSTH) data recorded from multichannel brainstem stimulation experiments.
 
@@ -7,7 +7,7 @@ This repository automates the process of fitting early and late neural responses
 
 ## Files
 
-### `automatedGaussianFit.m`
+### `automatedGaussianFit.m`  
 This script performs **automated curve fitting** on multichannel PSTH data. For each stimulation level and electrode channel:
 
 - It fits a **bi-Gaussian model** to the PSTH, representing the early and late neural response components.
@@ -23,7 +23,7 @@ This script performs **automated curve fitting** on multichannel PSTH data. For 
 
 ---
 
-### `final.m`
+### `final.m`  
 This script visualizes the automated fit results across **all 16 channels** in a single figure. For each channel:
 
 - It overlays early and late fitted Gaussians on top of the raw PSTH curves.
@@ -37,20 +37,12 @@ This script visualizes the automated fit results across **all 16 channels** in a
 
 ---
 
-## Notes
+### `biGaussian.m`  
+Defines the **bi-Gaussian model** used during fitting. This is the core model used in `lsqcurvefit` to capture the dual-peak structure of PSTH responses.
 
-- You can switch datasets by updating the `.mat` file path inside each script.
-- The pipeline assumes data is stored in a standard format with variables: `HistPeriod`, `details`, and `PeriodEdges4Plotting`.
-- This method supports reproducible, large-scale PSTH analysis with minimal manual tuning.
-
----
-
-## Example Output
-
-The resulting figure from `final.m` shows early and late responses across all 16 channels for a given trial. This allows intuitive visual inspection of the quality and consistency of the fits.
-
----
-
-## Dependencies
-- MATLAB R2020a or later
-- Curve Fitting Toolbox (for `lsqcurvefit`)
+```matlab
+function y = biGaussian(p, x)
+    y1 = p(1) * exp(-((x - p(2)).^2) / (2 * p(3)^2));  % Early Gaussian
+    y2 = p(4) * exp(-((x - p(5)).^2) / (2 * p(6)^2));  % Late Gaussian
+    y = y1 + y2;
+end
