@@ -47,6 +47,9 @@ function y = biGaussian(p, x)
     y = y1 + y2;
 end
 
+---
+
+****### `biGaussian.m`  ****
 final.m
 
 This script visualizes the automated fit results across all 16 channels in a single figure.
