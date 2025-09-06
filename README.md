@@ -1,48 +1,118 @@
-# PSTH-Automated-Gaussian  
-## BiGaussian Fitting Pipeline for Neural PSTH Data
+ow-signal conditions automatically
 
-This repository automates the process of fitting early and late neural responses using bi-Gaussian models. The scripts are designed for peri-stimulus time histogram (PSTH) data recorded from multichannel brainstem stimulation experiments.
-
----
-
-## Files
-
-### `automatedGaussianFit.m`  
-This script performs **automated curve fitting** on multichannel PSTH data. For each stimulation level and electrode channel:
-
-- It fits a **bi-Gaussian model** to the PSTH, representing the early and late neural response components.
-- The early peak is modeled using a symmetric Gaussian.
-- The late peak is also Gaussian, with parameter constraints to suppress unrealistic amplitudes or widths.
-- Fits are performed **from high to low stimulation levels**, promoting monotonic trends in peak latency (based on auditory physiology).
-- Outputs are saved to `autoFitResults.mat`.
-
-**Key Features:**
-- Preprocessing includes baseline subtraction using late trial windows.
-- All fitting uses `lsqcurvefit` with constraints to avoid overfitting.
-- Example plots are generated for quick verification.
+**Output:** `autoFitResults.mat`, containing the fit parameters for each `(level, channel)` pair.
 
 ---
 
-### `final.m`  
-This script visualizes the automated fit results across **all 16 channels** in a single figure. For each channel:
+### `skewedBiGaussian.m`
 
-- It overlays early and late fitted Gaussians on top of the raw PSTH curves.
-- Only **above-threshold** levels are shown (i.e., levels with a response ≥ 4× baseline standard deviation).
-- Colors differentiate different stimulus levels, with early fits shown as solid lines and late fits as dashed lines.
-
-**Key Features:**
-- Data is thresholded to exclude low-level/noisy responses.
-- Uses `subplot(4, 4, ch)` to compile all channel fits in one figure.
-- Useful for cross-channel comparison and batch QC.
-
----
-
-### `biGaussian.m`  
-Defines the **bi-Gaussian model** used during fitting. This is the core model used in `lsqcurvefit` to capture the dual-peak structure of PSTH responses.
+Defines the combined model used for curve fitting:
 
 ```matlab
-function y = biGaussian(p, x)
-    y1 = p(1) * exp(-((x - p(2)).^2) / (2 * p(3)^2));  % Early Gaussian
-    y2 = p(4) * exp(-((x - p(5)).^2) / (2 * p(6)^2));  % Late Gaussian
-    y = y1 + y2;
+function y = skewedBiGaussian(p, x)
+    g1 = p(1) * exp(-((x - p(2)).^2) / (2 * p(3)^2)) .* normcdf(x, p(5), p(4));   % Skewed early
+    g2 = p(6) * exp(-((x - p(7)).^2) / (2 * p(8)^2));                             % Normal late
+    y = g1 + g2;
 end
+
+### 'final.m'
+
+Generates a single figure with all 16 channels (subplot(4, 4, ch)) overlaid with:
+
+Raw PSTH (gray bars)
+
+Early fit (solid colored line)
+
+Late fit (dashed colored line)
+
+Key Features:
+
+Only plots above-threshold responses (≥4× baseline STD)
+
+Uses consistent time axis for all plots (0–20 ms)
+
+Color indicates stimulus level (parula colormap)
+
+Useful for batch quality control and comparison across channels
+
+plotAllChannelsWithFits.m
+
+Generates separate PNG figures for each channel, showing all levels on one plot.
+
+Key Features:
+
+Saves to channel_fit_figures/ folder
+
+PSTH shown as bars
+
+Early fits (solid), Late fits (dashed), color-coded by level
+
+Great for publication-quality visuals or detailed inspection
+
+Output:
+
+channel_fit_figures/
+├── Channel_01_Fits.png
+├── Channel_02_Fits.png
+...
+├── Channel_16_Fits.png
+
+
+extractFitMetrics.m
+
+Extracts and visualizes quantitative metrics from autoFitResults.mat.
+
+📊 Extracted Metrics:
+
+AUC (Area Under the Curve) for early and late responses
+
+Latency (Gaussian center) for early and late peaks
+
+Distance between peaks (in ms)
+
+Peak height (from Gaussian amplitude)
+
+📈 Output:
+
+Heatmaps for AUC (early/late), latency, and peak distance
+
+Console summary for a specified example level/channel (defaults to Level 10, Channel 8)
+
+Example console output:
+
+📊 Example — Trial: VA_21_04_20-Trial016 | Level 10, Channel 8
+Early Peak:  3.27 | Latency: 3.62 ms | AUC: 14.43
+Late Peak:   0.40 | Latency: 6.00 ms | AUC: 1.72
+Distance between Peaks: 2.38 ms
+
+
+You can modify the exampleLevel and exampleChannel variables to print any combination you want.
+
+🧠 Usage Summary
+% Step-by-step pipeline
+run('automatedGaussianFit.m');        % Fit PSTH curves
+run('final.m');                       % Plot all 16 channels in a single figure
+run('plotAllChannelsWithFits.m');     % Save per-channel PNGs
+run('extractFitMetrics.m');           % Extract AUC/latency + show heatmaps
+
+🧾 Input Requirements
+
+Each dataset .mat file must contain:
+
+HistPeriod (5D PSTH data)
+
+PeriodEdges4Plotting (time bins)
+
+details (artifact length, etc.)
+
+Make sure to update the dataFile path in each script to match your .mat file.
+
+📦 Output Summary
+Output File/Folder	Description
+autoFitResults.mat	Stores skewed + normal Gaussian parameters
+final.m figure	16-subplot overlay of fits
+channel_fit_figures/	Individual PNG plots per channel
+Heatmaps (extractFitMetrics)	AUC, latency, and peak separation
+👩‍💻 Maintainer
+
+Ashley Kim
