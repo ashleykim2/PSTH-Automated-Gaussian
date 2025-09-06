@@ -1,13 +1,13 @@
-%% final.m — Overlayed Gaussian Fits (16 Subplots in One Figure)
+%% final.m — Overlayed Skewed + Normal Gaussian Fits (16 Subplots in One Figure)
 clc; clear; close all;
 
 %% Specify which trial to analyze
-dataFile = 'VA_21_04_20-Trial016.mat';
-fitFile  = 'autoFitResults.mat';  % or the corresponding trial-specific fit file
+dataFile = 'VA_21_04_20-Trial016.mat';       % change this per dataset
+fitFile  = 'autoFitResults.mat';             % change if needed
 
 %% Load data and fit results
-load(fitFile);            % contains autoFitResults
-load(fullfile('..','Data', dataFile));  % contains HistPeriod, details, PeriodEdges4Plotting
+load(fitFile);                               % contains autoFitResults
+load(fullfile('..','Data', dataFile));       % contains HistPeriod, details, PeriodEdges4Plotting
 
 % Preprocess PSTH
 HistPeriodtoPlot = squeeze(mean(HistPeriod(:,:,:,1:end/2+1,:), 4));
@@ -30,7 +30,9 @@ peakPSTH = squeeze(max(HistPeriodtoPlot, [], 3));
 isAboveThreshold = peakPSTH > 4 * baselineSTD';
 
 %% Create one figure with all channels
-figure('Name', sprintf('Overlayed Fits: %s', dataFile), 'NumberTitle', 'off', 'Position', [100 100 1600 900]);
+figure('Name', sprintf('Overlayed Fits: %s', dataFile), ...
+       'NumberTitle', 'off', 'Position', [100 100 1600 900], ...
+       'Color', 'w');
 
 for ch = 1:numChannels
     subplot(4, 4, ch); hold on;
@@ -43,14 +45,23 @@ for ch = 1:numChannels
         psth = squeeze(HistPeriodtoPlot(lvl, ch, :));
         params = autoFitResults{lvl, ch};
 
-        if isempty(params) || any(structfun(@(x) any(isnan(x)), params.g1)) || any(structfun(@(x) any(isnan(x)), params.g2))
+        if isempty(params) || ...
+           any(structfun(@(x) any(isnan(x)), params.g1)) || ...
+           any(structfun(@(x) any(isnan(x)), params.g2))
             continue;
         end
 
-        early = params.g1.amp * exp(-((t - params.g1.center).^2) / (2 * params.g1.sigma^2));
-        late  = params.g2.amp * exp(-((t - params.g2.center).^2) / (2 * params.g2.sigma^2));
+        % Plot PSTH (gray)
+        bar(t, psth, 'FaceColor', [0.6 0.6 0.6], 'EdgeColor', 'none', 'FaceAlpha', 0.05);
 
-        bar(t, psth, 'FaceColor', [0.5 0.5 0.5], 'EdgeColor', 'none', 'FaceAlpha', 0.05);
+        % Early skewed Gaussian (solid)
+        early = params.g1.amp * exp(-((t - params.g1.center).^2) / (2 * params.g1.sigma^2)) ...
+                .* normcdf(t, params.g1.skewCenter, params.g1.skewSlope);
+
+        % Late normal Gaussian (dashed)
+        late = params.g2.amp * exp(-((t - params.g2.center).^2) / (2 * params.g2.sigma^2));
+
+        % Plot fits
         plot(t, early, '-',  'Color', colors(lvl,:), 'LineWidth', 1.5);
         plot(t, late,  '--', 'Color', colors(lvl,:), 'LineWidth', 1.5);
     end
@@ -60,7 +71,7 @@ for ch = 1:numChannels
     title(sprintf('%s Channel:%d', strrep(details.fn, '_', '-'), ch), 'FontSize', 9);
     xlim([0 20]);
     ylim([0 inf]);
+    set(gca, 'FontSize', 9);
 end
 
-% Add dynamic title with filename
-sgtitle(sprintf('Overlayed Early (solid) and Late (dashed) Gaussian Fits — %s', dataFile), 'FontSize', 12);
+sgtitle(sprintf('Overlayed Skewed Early and Normal Late Gaussian Fits — %s', dataFile), 'FontSize', 13);
