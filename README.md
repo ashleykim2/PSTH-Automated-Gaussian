@@ -36,7 +36,6 @@ This script visualizes the automated fit results across **all 16 channels** in a
 - Useful for cross-channel comparison and batch QC.
 
 ---
-
 ### `biGaussian.m`  
 Defines the **bi-Gaussian model** used during fitting. This is the core model used in `lsqcurvefit` to capture the dual-peak structure of PSTH responses.
 
@@ -49,8 +48,7 @@ end
 
 ---
 
-****### `biGaussian.m`  ****
-final.m
+### 'final.m'
 
 This script visualizes the automated fit results across all 16 channels in a single figure.
 
